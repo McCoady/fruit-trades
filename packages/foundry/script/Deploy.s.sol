@@ -1,7 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "../contracts/YourContract.sol";
+import {AssetToken} from "../contracts/AssetToken.sol";
+import {CreditToken} from "../contracts/CreditToken.sol";
+import {BasicDex} from "../contracts/BasicDex.sol";
+
 import "./DeployHelpers.s.sol";
 
 contract DeployScript is ScaffoldETHDeploy {
@@ -14,16 +17,42 @@ contract DeployScript is ScaffoldETHDeploy {
                 "You don't have a deployer account. Make sure you have set DEPLOYER_PRIVATE_KEY in .env or use `yarn generate` to generate a new random account"
             );
         }
+
+        address owner = vm.addr(deployerPrivateKey);
+
         vm.startBroadcast(deployerPrivateKey);
-        YourContract yourContract = new YourContract(
-            vm.addr(deployerPrivateKey)
-        );
-        console.logString(
-            string.concat(
-                "YourContract deployed at: ",
-                vm.toString(address(yourContract))
-            )
-        );
+        
+        // deploy tokens
+        CreditToken cred = new CreditToken("Salt", "SALT", owner);
+        AssetToken avocado = new AssetToken("Avocado", "AVOC", owner);
+        AssetToken banana = new AssetToken("Banana", "BNNA", owner);
+        AssetToken tomato = new AssetToken("Tomato", "TMTO", owner);
+        console2.log("Salt Address", address(cred));
+        console2.log("avocado Address", address(avocado));
+        console2.log("banana Address", address(banana));
+        console2.log("tomato Address", address(tomato));
+
+        // deploy dexes
+        BasicDex avocadoCred = new BasicDex(address(cred), address(avocado));
+        console2.log("avocado Dex Address", address(avocadoCred));
+        BasicDex bananaCred = new BasicDex(address(cred), address(banana));
+        console2.log("banana Dex Address", address(bananaCred));
+        BasicDex tomatoCred = new BasicDex(address(cred), address(tomato));
+        console2.log("tomato Dex Address", address(tomatoCred));
+
+        // approve dexes for trading
+        cred.approve(address(avocadoCred), type(uint256).max);
+        cred.approve(address(bananaCred), type(uint256).max);
+        cred.approve(address(tomatoCred), type(uint256).max);
+        avocado.approve(address(avocadoCred), type(uint256).max);
+        banana.approve(address(bananaCred), type(uint256).max);
+        tomato.approve(address(tomatoCred), type(uint256).max);
+
+        // Add initial liquidity to dexes;
+        avocadoCred.init(200 ether);
+        bananaCred.init(200 ether);
+        tomatoCred.init(200 ether);
+
         vm.stopBroadcast();
 
         /**
