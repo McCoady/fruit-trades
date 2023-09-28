@@ -21,12 +21,6 @@ struct ContractAddresses {
 contract PrepBurnerTraders is ScaffoldETHDeploy {
     using stdJson for string;
 
-
-    /// create private keys
-    /// store private keys to env
-    /// send gas token/credit/asset to address
-    /// max approve dex asset/credit
-
     function run() external {
         string memory writePath = ".env";
         uint256 deployerPk = setupLocalhostEnv();
@@ -64,6 +58,7 @@ contract PrepBurnerTraders is ScaffoldETHDeploy {
                 )
             )
         );
+        
         string memory projectRoot = vm.projectRoot();
         
         // change path to match chainId of target chain
@@ -80,29 +75,15 @@ contract PrepBurnerTraders is ScaffoldETHDeploy {
         console2.log("tomato dex", contractAddrs.tomatoDex);
         vm.startBroadcast(deployerPk);
 
-        // console2.log(
-        //     "Deployed credit balance",
-        //     IERC20(contractAddrs.creditToken).balanceOf(deployerAddress)
-        // );
-
-        
         // send gas to wallets
         payable(avocado.addr).transfer(0.01 ether);
         payable(banana.addr).transfer(0.01 ether);
         payable(tomato.addr).transfer(0.01 ether);
 
-        // console2.log("Avocado Trader Balance", avocado.addr.balance);
-        // console2.log("Banana Trader Balance", banana.addr.balance);
-        // console2.log("Tomato Trader Balance", tomato.addr.balance);
-
         // send credit to wallets
         CreditToken(contractAddrs.creditToken).transfer(avocado.addr, 200 ether);
         CreditToken(contractAddrs.creditToken).transfer(banana.addr, 200 ether);
         CreditToken(contractAddrs.creditToken).transfer(tomato.addr, 200 ether);
-
-        console2.log("Avocado Trader Credit Balance", CreditToken(contractAddrs.creditToken).balanceOf(avocado.addr));
-        console2.log("Banana Trader Credit Balance", CreditToken(contractAddrs.creditToken).balanceOf(banana.addr));
-        console2.log("Tomato Trader Credit Balance", CreditToken(contractAddrs.creditToken).balanceOf(tomato.addr));
 
         // send token to each
         AssetToken(contractAddrs.avocadoToken).transfer(avocado.addr, 200 ether);
