@@ -6,7 +6,7 @@ import "./solmate/Owned.sol";
 
 contract CreditToken is ERC20, Owned {
     constructor(string memory _name, string memory _symbol, address _owner) ERC20(_name, _symbol,18) Owned(_owner) {
-        _mint(msg.sender, 100_000 ether);
+        _mint(_owner, 100_000 ether);
     }
 
     function airdropToWallet(address _wallet) external onlyOwner {

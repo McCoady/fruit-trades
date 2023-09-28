@@ -5,7 +5,7 @@ import {AssetToken} from "../contracts/AssetToken.sol";
 import {CreditToken} from "../contracts/CreditToken.sol";
 import {BasicDex} from "../contracts/BasicDex.sol";
 
-import "./DeployHelpers.s.sol";
+import {ScaffoldETHDeploy, console2} from "./DeployHelpers.s.sol";
 
 contract DeployScript is ScaffoldETHDeploy {
     error InvalidPrivateKey(string);
@@ -21,12 +21,18 @@ contract DeployScript is ScaffoldETHDeploy {
         address owner = vm.addr(deployerPrivateKey);
 
         vm.startBroadcast(deployerPrivateKey);
-        
+
         // deploy tokens
         CreditToken cred = new CreditToken("Salt", "SALT", owner);
         AssetToken avocado = new AssetToken("Avocado", "AVOC", owner);
         AssetToken banana = new AssetToken("Banana", "BNNA", owner);
         AssetToken tomato = new AssetToken("Tomato", "TMTO", owner);
+
+        deployments.push(Deployment("creditToken", address(cred)));
+        deployments.push(Deployment("avocadoToken", address(avocado)));
+        deployments.push(Deployment("bananaToken", address(banana)));
+        deployments.push(Deployment("tomatoToken", address(tomato)));
+
         console2.log("Salt Address", address(cred));
         console2.log("avocado Address", address(avocado));
         console2.log("banana Address", address(banana));
@@ -39,6 +45,11 @@ contract DeployScript is ScaffoldETHDeploy {
         console2.log("banana Dex Address", address(bananaCred));
         BasicDex tomatoCred = new BasicDex(address(cred), address(tomato));
         console2.log("tomato Dex Address", address(tomatoCred));
+
+        deployments.push(Deployment("avocadoDex", address(avocadoCred)));
+        deployments.push(Deployment("bananaDex", address(bananaCred)));
+        deployments.push(Deployment("tomatoDex", address(tomatoCred)));
+
 
         // approve dexes for trading
         cred.approve(address(avocadoCred), type(uint256).max);
